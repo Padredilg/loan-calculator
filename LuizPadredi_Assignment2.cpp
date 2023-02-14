@@ -14,14 +14,18 @@ https://stackoverflow.com/questions/14765155/how-can-i-easily-format-my-data-tab
 
 using namespace std;
 
+void start();
+void askForNewLoan();
 void getUserInput(double& P, double& r, int& n);
 double calculateAmortization(double P, double r, int n);
 void outputTable(double P, double r, int n, double M);
 void calculateStartOfMonth(double& interest, double beginningBalance, double rate, double& principal, double amortization, double& endingBalance);
 void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
 void printSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
+string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance);
+string writeLabel(string label1, string label2, string label3, string label4, string label5);
 
-string columnLable(const string s);
+string columnLabel(const string s);
 string rowDoubleValue(const double x);
 string rowIntValue(const int x);
 string printYearEnd(string s, int month);
@@ -40,7 +44,7 @@ Functions that are needed to run the program:
 
 4. (DONE) A function that calculates the interest and balance for each month.
 
-- A function that keeps track of total payment and total interest accumulated.
+5. (DONE) A function that keeps track of total payment and total interest accumulated.
    This can be a call-by-reference function.
 */
 
@@ -58,7 +62,7 @@ Payment Every Month $922.90
 Total of 24 Payments $22,149.56
 Total Interest $2,149.56
 
-Your program should allow the user to repeat this calculation as often as desired
+6. (START) Your program should allow the user to repeat this calculation as often as desired
 
 */
 
@@ -81,6 +85,16 @@ int main()
          << "Greetings User! I can help you plan for your loan."
          << endl << endl;
 
+    start();
+
+    cout << endl
+         << "Thank you for your time!"
+         << endl << endl;
+
+    return 0;
+}
+
+void start(){
     double P; //the principal loan amount
     double r; //monthly interest rate
     int n; //n = number of payments in months
@@ -91,7 +105,42 @@ int main()
 
     outputTable(P, r, n, M);
 
-    return 0;
+    askForNewLoan();
+}
+
+void askForNewLoan(){
+    int choice;
+    cout << endl
+         << "Would you like to calculate a new Loan?" << endl
+         << "Please select the number corresponding to your choice."
+         << endl << endl
+         << "1 - Yes" << endl
+         << "2 - No"
+         << endl << endl;
+    cin >> choice;
+
+    while (cin.fail() || choice < 1 || choice > 2){
+        cin.clear(); // clear input buffer to restore cin to a usable state
+        cin.ignore(INT_MAX, '\n'); // ignore last input
+        cout << "That is not a valid entry."
+             << endl << endl
+             << "Please select the number corresponding to the service you are looking for."
+             << endl << endl
+             << "1 - Calculate new Loan." << endl
+             << "2 - Exit." << endl
+             << endl << endl;
+
+        cin >> choice;
+    }
+
+    switch (choice){
+        case 1:
+            start();
+            break;
+        default:
+            return;
+    }
+
 }
 
 // Collects user input for Principal Amount, Monthly Rate, and Number of Payments in months
@@ -161,13 +210,10 @@ double calculateAmortization(double P, double r, int n){
 
 //displays info in table format
 void outputTable(double P, double r, int n, double M){
-    cout << endl << endl
-         << columnLable(" ") << " | "
-         << columnLable("Beginning Balance") << " | "
-         << columnLable("Interest") << " | "
-         << columnLable("Principal") << " | "
-         << columnLable("Ending Balance") << endl
-         << string(TABLE_WIDTH, '-') << endl;
+    string label = writeLabel(" ", "Beginning Balance", "Interest", "Principal", "Ending Balance");
+
+    cout << label;
+    //FIXME --> add label to file
 
     double beginningBalance = P;
     double interest;
@@ -175,21 +221,6 @@ void outputTable(double P, double r, int n, double M){
     double endingBalance = beginningBalance;
     double totalInterestPaid = 0;
     double totalAmountPaid = 0;
-
-/*
-    - A function that keeps track of total payment and total interest accumulated.
-       This can be a call-by-reference function.
-*/
-
-/*
-Finally
-the program outputs the total interest paid over the life of the loan like follows:
-    Payment Every Month $922.90
-    Total of 24 Payments $22,149.56
-    Total Interest $2,149.56
-*/
-
-
 
     for(int i=1; i <= n; i++){
         calculateStartOfMonth(interest, beginningBalance, r, principal, M, endingBalance);
@@ -199,11 +230,10 @@ the program outputs the total interest paid over the life of the loan like follo
         //THEN IN HERE WE CALL COUT WITH THE STRING,
         //AND PRINT TO FILE WITH SAME STRING
 
-        cout << rowIntValue(i) << " | "
-             << rowDoubleValue(beginningBalance) << " | "
-             << rowDoubleValue(interest) << " | "
-             << rowDoubleValue(principal) << " | "
-             << rowDoubleValue(endingBalance) << "\n";
+        string row = writeRow(i, beginningBalance, interest, principal, endingBalance);
+
+        cout << row;
+        //FIXME --> add row to file
 
         if(i%12 == 0){
             cout << string(TABLE_WIDTH, '-') << endl
@@ -218,12 +248,36 @@ the program outputs the total interest paid over the life of the loan like follo
     printSummary(M, n, totalAmountPaid, totalInterestPaid);
 }
 
+//returns string that makes up initial row of table containing labels
+string writeLabel(string label1, string label2, string label3, string label4, string label5){
+    string label = "\n\n" + columnLabel(label1) + " | "
+                     + columnLabel(label2) + " | "
+                     + columnLabel(label3) + " | "
+                     + columnLabel(label4) + " | "
+                     + columnLabel(label5) + "\n"
+                     + string(TABLE_WIDTH, '-') + "\n";
+
+    return label;
+}
+
+//returns string that makes up one row of the table
+string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance){
+    return rowIntValue(i) + " | "
+            + rowDoubleValue(beginningBalance) + " | "
+            + rowDoubleValue(interest) + " | "
+            + rowDoubleValue(principal) + " | "
+            + rowDoubleValue(endingBalance) + "\n";
+
+}
+
 void printSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid){
     cout << endl << endl
          << "Payment Every Month: $" << M << endl
          << "Total of " << nOfMonths << " Payments: $" << totalAmountPaid << endl
          << "Total Interest paid: $" << totalInterestPaid << endl
          << endl;
+
+     //FIXME --> ADD SUMMARY TO FILE
 }
 
 //tracks the amount paid in interest, and in total
@@ -263,7 +317,7 @@ string rowIntValue(const int x) {
 }
 
 //Center-aligns string within a field of width w.
-string columnLable(string s) {
+string columnLabel(string s) {
     stringstream ss, spaces;
     int padding = CELL_WIDTH - s.size();                 // count excess room to pad
     for(int i=0; i<padding/2; ++i)
