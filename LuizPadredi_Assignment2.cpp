@@ -17,7 +17,9 @@ using namespace std;
 void getUserInput(double& P, double& r, int& n);
 double calculateAmortization(double P, double r, int n);
 void outputTable(double P, double r, int n, double M);
-void calculateInterest(double& interest, double balance, double rate);
+void calculateStartOfMonth(double& interest, double beginningBalance, double rate, double& principal, double amortization, double& endingBalance);
+void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
+void printSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
 
 string columnLable(const string s);
 string rowDoubleValue(const double x);
@@ -36,8 +38,7 @@ Functions that are needed to run the program:
 
 3. (IN PROCESS) An output function which displays the table to the screen and writes it to a file.
 
-- A function that calculates the interest and balance for each month.
-   This can be a call-by reference function.
+4. (DONE) A function that calculates the interest and balance for each month.
 
 - A function that keeps track of total payment and total interest accumulated.
    This can be a call-by-reference function.
@@ -176,13 +177,6 @@ void outputTable(double P, double r, int n, double M){
     double totalAmountPaid = 0;
 
 /*
-    - A function that calculates the interest and balance for each month.
-   This can be a call-by reference function.
-*/
-
-
-
-/*
     - A function that keeps track of total payment and total interest accumulated.
        This can be a call-by-reference function.
 */
@@ -198,9 +192,12 @@ the program outputs the total interest paid over the life of the loan like follo
 
 
     for(int i=1; i <= n; i++){
-        calculateInterest(interest, beginningBalance, r);
-        principal = M - interest;
-        endingBalance -= principal;
+        calculateStartOfMonth(interest, beginningBalance, r, principal, M, endingBalance);
+
+        //MAYBE GOOD WAY TO TRANSLATE TO FILE WOULD BE
+        //TO HAVE TEXT BE RETURNED FROM A FUNCTION THAT BUILDS A STRING,
+        //THEN IN HERE WE CALL COUT WITH THE STRING,
+        //AND PRINT TO FILE WITH SAME STRING
 
         cout << rowIntValue(i) << " | "
              << rowDoubleValue(beginningBalance) << " | "
@@ -214,16 +211,32 @@ the program outputs the total interest paid over the life of the loan like follo
                  << string(TABLE_WIDTH, '-') << endl;
         }
 
-//        trackPayments(interest, totalInterestPaid, );
+        trackPayments(interest, totalInterestPaid, principal, totalAmountPaid);
         beginningBalance = endingBalance;
     }
 
-//    printSummary();
+    printSummary(M, n, totalAmountPaid, totalInterestPaid);
+}
+
+void printSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid){
+    cout << endl << endl
+         << "Payment Every Month: $" << M << endl
+         << "Total of " << nOfMonths << " Payments: $" << totalAmountPaid << endl
+         << "Total Interest paid: $" << totalInterestPaid << endl
+         << endl;
+}
+
+//tracks the amount paid in interest, and in total
+void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid){
+    totalInterestPaid += interest;
+    totalAmountPaid += principal + interest;
 }
 
 // calculates and updates the interest rate for the given balance and monthly rate
-void calculateInterest(double& interest, double balance, double rate){
-    interest = balance * rate;
+void calculateStartOfMonth(double& interest, double beginningBalance, double rate, double& principal, double amortization, double& endingBalance){
+    interest = beginningBalance * rate;
+    principal = amortization - interest;
+    endingBalance -= principal;
 }
 
 
@@ -236,7 +249,7 @@ string rowDoubleValue(const double x) {
     ss.width(CELL_WIDTH);     // set  width around displayed #
     ss.precision(2); // set # places after decimal
     ss << x;
-    return ss.str();
+    return "$" + ss.str();
 }
 
 //Converts int to string and fits in row space of specified width
@@ -244,7 +257,7 @@ string rowIntValue(const int x) {
     stringstream ss;
     ss << fixed << right;
     ss.fill(' ');        // fill space around displayed #
-    ss.width(CELL_WIDTH);     // set  width around displayed #
+    ss.width(CELL_WIDTH - 2);     // set  width around displayed #
     ss << x;
     return ss.str();
 }
