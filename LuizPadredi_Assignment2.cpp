@@ -6,11 +6,15 @@ Repository: https://github.com/Padredilg/loan-calculator
 
 source for learning how to organize table
 https://stackoverflow.com/questions/14765155/how-can-i-easily-format-my-data-table-in-c
+
+source for checking string input
+https://stackoverflow.com/questions/6605282/how-can-i-check-if-a-string-has-special-characters-in-c-effectively
 */
 
 #include <iostream>
 #include <cmath>
 #include <sstream>
+#include <fstream>
 
 using namespace std;
 
@@ -19,6 +23,8 @@ void askForNewLoan();
 void getUserInput(double& P, double& r, int& n);
 double calculateAmortization(double P, double r, int n);
 void outputTable(double P, double r, int n, double M);
+bool askIfWritingToFile();
+void promptForFileName(string& fileName);
 void calculateStartOfMonth(double& interest, double beginningBalance, double rate, double& principal, double amortization, double& endingBalance);
 void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
 string writeSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
@@ -32,52 +38,6 @@ string writeEndYear(int year);
 
 const int TABLE_WIDTH = 100;
 const int CELL_WIDTH = 17;
-/*
-
-Functions that are needed to run the program:
-
-1. (DONE)- An input function which prompts and fills the input with values for P, r and n.
-
-2. (DONE)- A function that calculates and returns amortization M
-
-3. (IN PROCESS) An output function which displays the table to the screen and writes it to a file.
-
-4. (DONE) A function that calculates the interest and balance for each month.
-
-5. (DONE) A function that keeps track of total payment and total interest accumulated.
-   This can be a call-by-reference function.
-*/
-
-/*
-
-Your program should output to a file
-as well display on the screen
-a table that shows the interest
-and principal portion of the loan for every month
-as well as the total interest paid up to that month and the remaining balance.
-
-Finally
-the program outputs the total interest paid over the life of the loan like follows:
-Payment Every Month $922.90
-Total of 24 Payments $22,149.56
-Total Interest $2,149.56
-
-6. (START) Your program should allow the user to repeat this calculation as often as desired
-
-*/
-
-/*
-
-End purpose in my own words:
-
-display, in a table like format
-
-Balance left,
-interest for current month off,
-principal off of M - interest,
-balance after payment
-
-*/
 
 int main()
 {
@@ -217,6 +177,39 @@ double calculateAmortization(double P, double r, int n){
 
 //displays info in table format
 void outputTable(double P, double r, int n, double M){
+
+    /*
+
+    declare
+        output file var
+        isWriteToFile bool
+
+    ask user if they want to print this info into a file as well as see it onto a terminal.
+
+
+
+    if yes,
+        prompt for file name
+        isWriteToFile = true
+
+
+    include if statements that execute depending on isWriteToFile
+
+
+
+    at end, close var
+
+    */
+    ofstream out_stream;
+    bool isWritingToFile = askIfWritingToFile();
+    string fileName;
+
+    if(isWritingToFile){
+        promptForFileName(fileName);
+        //open file
+    }
+
+
     string label = writeLabel(" ", "Beginning Balance", "Interest", "Principal", "Ending Balance");
     cout << label;
     //FIXME --> ADD LABEL TO FILE
@@ -248,6 +241,63 @@ void outputTable(double P, double r, int n, double M){
     string summary = writeSummary(M, n, totalAmountPaid, totalInterestPaid);
     cout << summary;
     //FIXME --> ADD SUMMARY TO FILE
+
+
+    //if writing to file, close file
+}
+
+void promptForFileName(string& fileName){
+    cout << endl
+         << "Please choose a name for your file.\nDo not include the file extension." << endl
+         << "file name: ";
+    cin >> fileName;
+
+    while (cin.fail() ||
+           ( fileName.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_")!= std::string::npos) )
+   {
+        cin.clear(); // clear input buffer to restore cin to a usable state
+        cin.ignore(INT_MAX, '\n'); // ignore last input
+        cout << "That is not a valid entry."
+             << endl << endl
+             << "Your file name should only can contain lowercase letters, uppercase letters, numbers, and underscores."
+             << endl << endl
+             << "Please choose a name for your file.\nDo not include the file extension." << endl
+             << "file name: ";
+        cin >> fileName;
+    }
+}
+
+bool askIfWritingToFile(){
+    int choice;
+    cout << endl
+         << "Would you like your loan table to be printed into a text file as well as the terminal screen?" << endl
+         << "Please select the number corresponding to your choice."
+         << endl << endl
+         << "1 - Yes" << endl
+         << "2 - No"
+         << endl << endl;
+    cin >> choice;
+
+    while (cin.fail() || choice < 1 || choice > 2){
+        cin.clear(); // clear input buffer to restore cin to a usable state
+        cin.ignore(INT_MAX, '\n'); // ignore last input
+        cout << "That is not a valid entry."
+             << endl << endl
+             << "Please select the number corresponding to the service you are looking for."
+             << endl << endl
+             << "1 - Write table to text file." << endl
+             << "2 - Do not write table to text file." << endl
+             << endl << endl;
+
+        cin >> choice;
+    }
+
+    switch (choice){
+        case 1:
+            return true;
+        default:
+            return false;
+    }
 }
 
 //returns string that makes up initial row of table containing labels
@@ -272,6 +322,7 @@ string writeRow(int i, double beginningBalance, double interest, double principa
 
 }
 
+//returns string with payment summary information
 string writeSummary(double M, int n, double totalAmountPaid, double totalInterestPaid){
     stringstream amortization;
     amortization << M;
