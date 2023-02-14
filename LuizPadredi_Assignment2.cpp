@@ -4,7 +4,7 @@ Date: 02/11/2023
 Assignment 2: Loan Calculator
 Repository: https://github.com/Padredilg/loan-calculator
 
-source organizing table
+source for learning how to organize table
 https://stackoverflow.com/questions/14765155/how-can-i-easily-format-my-data-table-in-c
 */
 
@@ -21,14 +21,14 @@ double calculateAmortization(double P, double r, int n);
 void outputTable(double P, double r, int n, double M);
 void calculateStartOfMonth(double& interest, double beginningBalance, double rate, double& principal, double amortization, double& endingBalance);
 void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
-void printSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
+string writeSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
 string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance);
 string writeLabel(string label1, string label2, string label3, string label4, string label5);
 
 string columnLabel(const string s);
 string rowDoubleValue(const double x);
 string rowIntValue(const int x);
-string printYearEnd(string s, int month);
+string writeEndYear(int year);
 
 const int TABLE_WIDTH = 100;
 const int CELL_WIDTH = 17;
@@ -89,7 +89,7 @@ int main()
 
     cout << endl
          << "Thank you for your time!"
-         << endl << endl;
+         << endl;
 
     return 0;
 }
@@ -145,6 +145,13 @@ void askForNewLoan(){
 
 // Collects user input for Principal Amount, Monthly Rate, and Number of Payments in months
 void getUserInput(double& P, double& r, int& n){
+    cout << "================================================================================"
+         << endl << endl
+         << "Planning for your Loan."
+         << endl << endl
+         << "================================================================================"
+         << endl << endl;
+
     ///Collect Principal Amount - P
     cout << "Please provide the following information: "<< endl
          << endl
@@ -211,9 +218,8 @@ double calculateAmortization(double P, double r, int n){
 //displays info in table format
 void outputTable(double P, double r, int n, double M){
     string label = writeLabel(" ", "Beginning Balance", "Interest", "Principal", "Ending Balance");
-
     cout << label;
-    //FIXME --> add label to file
+    //FIXME --> ADD LABEL TO FILE
 
     double beginningBalance = P;
     double interest;
@@ -225,27 +231,23 @@ void outputTable(double P, double r, int n, double M){
     for(int i=1; i <= n; i++){
         calculateStartOfMonth(interest, beginningBalance, r, principal, M, endingBalance);
 
-        //MAYBE GOOD WAY TO TRANSLATE TO FILE WOULD BE
-        //TO HAVE TEXT BE RETURNED FROM A FUNCTION THAT BUILDS A STRING,
-        //THEN IN HERE WE CALL COUT WITH THE STRING,
-        //AND PRINT TO FILE WITH SAME STRING
-
         string row = writeRow(i, beginningBalance, interest, principal, endingBalance);
-
         cout << row;
-        //FIXME --> add row to file
+        //FIXME --> ADD ROW TO FILE
 
         if(i%12 == 0){
-            cout << string(TABLE_WIDTH, '-') << endl
-                 << printYearEnd("END YEAR", i/12)  <<endl
-                 << string(TABLE_WIDTH, '-') << endl;
+            string endYear = writeEndYear(i/12);
+            cout << endYear;
+            //FIXME --> ADD ENDYEAR TO FILE
         }
 
         trackPayments(interest, totalInterestPaid, principal, totalAmountPaid);
         beginningBalance = endingBalance;
     }
 
-    printSummary(M, n, totalAmountPaid, totalInterestPaid);
+    string summary = writeSummary(M, n, totalAmountPaid, totalInterestPaid);
+    cout << summary;
+    //FIXME --> ADD SUMMARY TO FILE
 }
 
 //returns string that makes up initial row of table containing labels
@@ -270,14 +272,23 @@ string writeRow(int i, double beginningBalance, double interest, double principa
 
 }
 
-void printSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid){
-    cout << endl << endl
-         << "Payment Every Month: $" << M << endl
-         << "Total of " << nOfMonths << " Payments: $" << totalAmountPaid << endl
-         << "Total Interest paid: $" << totalInterestPaid << endl
-         << endl;
+string writeSummary(double M, int n, double totalAmountPaid, double totalInterestPaid){
+    stringstream amortization;
+    amortization << M;
 
-     //FIXME --> ADD SUMMARY TO FILE
+    stringstream nOfMonths;
+    nOfMonths << n;
+
+    stringstream totalAmount;
+    totalAmount << totalAmountPaid;
+
+    stringstream totalInterest;
+    totalInterest << totalInterestPaid;
+
+
+    return "\n\nPayment Every Month: $" + amortization.str()
+         + "\nTotal of " + nOfMonths.str() + " Payments: $" + totalAmount.str()
+         + "\nTotal Interest paid: $" + totalInterest.str() + "\n\n";
 }
 
 //tracks the amount paid in interest, and in total
@@ -329,13 +340,17 @@ string columnLabel(string s) {
 }
 
 //Prints a separation in the table signalizing end of a year
-string printYearEnd(string s, int month) {
+string writeEndYear(int year) {
     stringstream ss, spaces;
-    int padding = TABLE_WIDTH - s.size();                 // count excess room to pad
+    int padding = TABLE_WIDTH - 9;                 // count excess room to pad
     for(int i=0; i<padding/2; ++i)
         spaces << " ";
-    ss << spaces.str() << s << " " << month << spaces.str();    // format with padding
+    ss << spaces.str() << "END YEAR " << year << spaces.str();    // format with padding
     if(padding>0 && padding%2!=0)               // if odd #, add 1 space
         ss << " ";
-    return ss.str();
+    string endYearLine = ss.str();
+
+    return string(TABLE_WIDTH, '-') + "\n"
+           + endYearLine  + "\n"
+           + string(TABLE_WIDTH, '-') + "\n";
 }
