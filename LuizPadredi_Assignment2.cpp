@@ -11,14 +11,14 @@ Repository: https://github.com/Padredilg/loan-calculator
 using namespace std;
 
 void getUserInput(double& P, double& r, int& n);
-
+double calculateAmortization(double P, double r, int n);
 /*
 
 Functions that are needed to run the program:
 
 1. (DONE)- An input function which prompts and fills the input with values for P, r and n.
 
-2. A function that calculates and returns amortization M
+2. (DONE)- A function that calculates and returns amortization M
 
 - A function that calculates the interest and balance for each month.
 Why?
@@ -77,9 +77,9 @@ int main()
 
     getUserInput(P, r, n);
 
+    double M = calculateAmortization(P, r, n);
 
-
-    cout << P << " " << r << " " << n << " ";
+    cout << P << " " << r << " " << n << " " << M;
 
     return 0;
 }
@@ -142,4 +142,12 @@ void getUserInput(double& P, double& r, int& n){
     }
 }
 
+double calculateAmortization(double P, double r, int n){
 
+    double w = pow( (1+r) , n );
+
+    double M = P * r * w / ( w - 1 );
+
+    return M;
+
+}
