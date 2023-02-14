@@ -17,14 +17,15 @@ using namespace std;
 void getUserInput(double& P, double& r, int& n);
 double calculateAmortization(double P, double r, int n);
 void outputTable(double P, double r, int n, double M);
+void calculateInterest(double& interest, double balance, double rate);
 
 string columnLable(const string s);
 string rowDoubleValue(const double x);
 string rowIntValue(const int x);
 string printYearEnd(string s, int month);
 
-const int tableWidth = 100;
-const int cellWidth = 17;
+const int TABLE_WIDTH = 100;
+const int CELL_WIDTH = 17;
 /*
 
 Functions that are needed to run the program:
@@ -36,17 +37,10 @@ Functions that are needed to run the program:
 3. (IN PROCESS) An output function which displays the table to the screen and writes it to a file.
 
 - A function that calculates the interest and balance for each month.
-Why?
-
-    This can be a call-by reference function.
+   This can be a call-by reference function.
 
 - A function that keeps track of total payment and total interest accumulated.
-Why?
-    This can be a call-by-reference function.
-
-
-
-
+   This can be a call-by-reference function.
 */
 
 /*
@@ -95,8 +89,6 @@ int main()
     double M = calculateAmortization(P, r, n);
 
     outputTable(P, r, n, M);
-
-    cout << P << " " << r << " " << n << " " << M;
 
     return 0;
 }
@@ -168,20 +160,48 @@ double calculateAmortization(double P, double r, int n){
 
 //displays info in table format
 void outputTable(double P, double r, int n, double M){
-    cout << columnLable(" ") << " | "
+    cout << endl << endl
+         << columnLable(" ") << " | "
          << columnLable("Beginning Balance") << " | "
          << columnLable("Interest") << " | "
          << columnLable("Principal") << " | "
          << columnLable("Ending Balance") << endl
-         << string(tableWidth, '-') << endl;
+         << string(TABLE_WIDTH, '-') << endl;
 
     double beginningBalance = P;
-    double interest = 10;
-    double principal = 10;
-    double endingBalance = 0;
+    double interest;
+    double principal;
+    double endingBalance = beginningBalance;
+    double totalInterestPaid = 0;
+    double totalAmountPaid = 0;
+
+/*
+    - A function that calculates the interest and balance for each month.
+   This can be a call-by reference function.
+*/
+
+
+
+/*
+    - A function that keeps track of total payment and total interest accumulated.
+       This can be a call-by-reference function.
+*/
+
+/*
+Finally
+the program outputs the total interest paid over the life of the loan like follows:
+    Payment Every Month $922.90
+    Total of 24 Payments $22,149.56
+    Total Interest $2,149.56
+*/
+
 
 
     for(int i=1; i <= n; i++){
+        calculateInterest(interest, beginningBalance, r);
+        principal = M - interest;
+        endingBalance -= principal;
+
         cout << rowIntValue(i) << " | "
              << rowDoubleValue(beginningBalance) << " | "
              << rowDoubleValue(interest) << " | "
@@ -189,23 +209,31 @@ void outputTable(double P, double r, int n, double M){
              << rowDoubleValue(endingBalance) << "\n";
 
         if(i%12 == 0){
-            cout << string(tableWidth, '-') << endl
+            cout << string(TABLE_WIDTH, '-') << endl
                  << printYearEnd("END YEAR", i/12)  <<endl
-                 << string(tableWidth, '-') << endl;
+                 << string(TABLE_WIDTH, '-') << endl;
         }
 
+//        trackPayments(interest, totalInterestPaid, );
+        beginningBalance = endingBalance;
     }
+
+//    printSummary();
 }
+
+// calculates and updates the interest rate for the given balance and monthly rate
+void calculateInterest(double& interest, double balance, double rate){
+    interest = balance * rate;
+}
+
 
 
 //Converts double to string and fits in row space of specified width
 string rowDoubleValue(const double x) {
-    const int width = 17;
-
     stringstream ss;
     ss << fixed << right;
     ss.fill(' ');        // fill space around displayed #
-    ss.width(cellWidth);     // set  width around displayed #
+    ss.width(CELL_WIDTH);     // set  width around displayed #
     ss.precision(2); // set # places after decimal
     ss << x;
     return ss.str();
@@ -216,7 +244,7 @@ string rowIntValue(const int x) {
     stringstream ss;
     ss << fixed << right;
     ss.fill(' ');        // fill space around displayed #
-    ss.width(cellWidth);     // set  width around displayed #
+    ss.width(CELL_WIDTH);     // set  width around displayed #
     ss << x;
     return ss.str();
 }
@@ -224,7 +252,7 @@ string rowIntValue(const int x) {
 //Center-aligns string within a field of width w.
 string columnLable(string s) {
     stringstream ss, spaces;
-    int padding = cellWidth - s.size();                 // count excess room to pad
+    int padding = CELL_WIDTH - s.size();                 // count excess room to pad
     for(int i=0; i<padding/2; ++i)
         spaces << " ";
     ss << spaces.str() << s << spaces.str();    // format with padding
@@ -233,9 +261,10 @@ string columnLable(string s) {
     return ss.str();
 }
 
+//Prints a separation in the table signalizing end of a year
 string printYearEnd(string s, int month) {
     stringstream ss, spaces;
-    int padding = tableWidth - s.size();                 // count excess room to pad
+    int padding = TABLE_WIDTH - s.size();                 // count excess room to pad
     for(int i=0; i<padding/2; ++i)
         spaces << " ";
     ss << spaces.str() << s << " " << month << spaces.str();    // format with padding
