@@ -343,16 +343,16 @@ string writeRow(int i, double beginningBalance, double interest, double principa
 //returns string with payment summary information
 string writeSummary(double M, int n, double totalAmountPaid, double totalInterestPaid){
     stringstream amortization;
-    amortization << M;
+    amortization << ceil(M * 100.0) / 100.0;
 
     stringstream nOfMonths;
     nOfMonths << n;
 
     stringstream totalAmount;
-    totalAmount << totalAmountPaid;
+    totalAmount << ceil(totalAmountPaid * 100.0) / 100.0;
 
     stringstream totalInterest;
-    totalInterest << totalInterestPaid;
+    totalInterest << ceil(totalInterestPaid * 100.0) / 100.0;
 
 
     return "\n\nPayment Every Month: $" + amortization.str()

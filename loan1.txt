@@ -39,7 +39,7 @@ Number of Payments: 24
 ----------------------------------------------------------------------------------------------------
 
 
-Payment Every Month: $922.899
+Payment Every Month: $922.9
 Total of 24 Payments: $22149.6
-Total Interest paid: $2149.56
+Total Interest paid: $2149.57
 
