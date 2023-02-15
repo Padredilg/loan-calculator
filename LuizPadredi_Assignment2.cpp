@@ -1,6 +1,6 @@
 /*
 Author: Luiz Padredi
-Date: 02/11/2023
+Date: 02/15/2023
 Assignment 2: Loan Calculator
 Repository: https://github.com/Padredilg/loan-calculator
 
