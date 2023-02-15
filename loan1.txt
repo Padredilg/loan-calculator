@@ -1,6 +1,6 @@
 
 Name: loan1
-Requested Loan: $20000
+Requested Loan: $20000.00
 Annual Interest Rate Percentage: 10%
 Monthly Interest Rate: 0.00833333
 Number of Payments: 24

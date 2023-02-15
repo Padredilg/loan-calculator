@@ -306,13 +306,15 @@ string writeLabel(double P, double r, int n, string fileName, double annualRateP
     nOfMonths << n;
 
     stringstream loanAmount;
+    loanAmount << fixed;
+    loanAmount.precision(2);
     loanAmount << P;
 
     stringstream rate;
     rate << r;
 
     stringstream annualRate;
-    annualRate << annualRatePercent;
+    annualRate << ceil(100.0 * annualRatePercent)/100;
 
     string label =   "\nName: " + fileName
                      + "\nRequested Loan: $" + loanAmount.str()
