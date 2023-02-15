@@ -29,7 +29,7 @@ void calculateStartOfMonth(double& interest, double beginningBalance, double rat
 void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
 string writeSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
 string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance);
-string writeLabel(string label1, string label2, string label3, string label4, string label5, double P, double r, int n, string fileName);
+string writeLabel(double P, double r, int n, string fileName);
 
 string columnLabel(const string s);
 string rowDoubleValue(const double x);
@@ -195,7 +195,7 @@ void outputTable(double P, double r, int n, double M){
     }
 
 
-    string label = writeLabel(" ", "Beginning Balance", "Interest", "Principal", "Ending Balance", P, r, n, fileName);
+    string label = writeLabel(P, r, n, fileName);
     cout << label;
     //FIXME --> ADD LABEL TO FILE
     if(isWritingToFile){
@@ -301,9 +301,8 @@ bool askIfWritingToFile(){
     }
 }
 
-//UPDATEME -- Include Date and Time on top of table
 //returns string that makes up initial row of table containing labels
-string writeLabel(string label1, string label2, string label3, string label4, string label5, double P, double r, int n, string fileName){
+string writeLabel(double P, double r, int n, string fileName){
 
     stringstream nOfMonths;
     nOfMonths << n;
@@ -319,11 +318,11 @@ string writeLabel(string label1, string label2, string label3, string label4, st
                      + "\nMonthly rate: " + rate.str()
                      + "\nNumber of Payments: " + nOfMonths.str()
                      + "\n\n"
-                     + columnLabel(label1) + " | "
-                     + columnLabel(label2) + " | "
-                     + columnLabel(label3) + " | "
-                     + columnLabel(label4) + " | "
-                     + columnLabel(label5) + "\n"
+                     + columnLabel(" ") + " | "
+                     + columnLabel("Beginning Balance") + " | "
+                     + columnLabel("Interest") + " | "
+                     + columnLabel("Principal") + " | "
+                     + columnLabel("Ending Balance") + "\n"
                      + string(TABLE_WIDTH, '-') + "\n";
 
     return label;
