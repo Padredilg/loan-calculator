@@ -20,16 +20,16 @@ using namespace std;
 
 void start();
 void askForNewLoan();
-void getUserInput(double& P, double& r, int& n);
+void getUserInput(double& P, double& r, int& n, double& annualRatePercent);
 double calculateAmortization(double P, double r, int n);
-void outputTable(double P, double r, int n, double M);
+void outputTable(double P, double r, int n, double M, double annualRatePercent);
 bool askIfWritingToFile();
 void promptForFileName(string& fileName);
 void calculateStartOfMonth(double& interest, double beginningBalance, double rate, double& principal, double amortization, double& endingBalance);
 void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
 string writeSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
 string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance);
-string writeLabel(double P, double r, int n, string fileName);
+string writeLabel(double P, double r, int n, string fileName, double annualRatePercent);
 
 string columnLabel(const string s);
 string rowDoubleValue(const double x);
@@ -59,12 +59,13 @@ void start(){
     double P; //the principal loan amount
     double r; //monthly interest rate
     int n; //n = number of payments in months
+    double annualRatePercent; // annual rate percentage, such as 10%/year
 
-    getUserInput(P, r, n);
+    getUserInput(P, r, n, annualRatePercent);
 
     double M = calculateAmortization(P, r, n);
 
-    outputTable(P, r, n, M);
+    outputTable(P, r, n, M, annualRatePercent);
 
     askForNewLoan();
 }
@@ -106,7 +107,7 @@ void askForNewLoan(){
 }
 
 // Collects user input for Principal Amount, Monthly Rate, and Number of Payments in months
-void getUserInput(double& P, double& r, int& n){
+void getUserInput(double& P, double& r, int& n, double& annualRatePercent){
     cout << "================================================================================"
          << endl << endl
          << "Planning for your Loan."
@@ -135,9 +136,9 @@ void getUserInput(double& P, double& r, int& n){
 
     ///Collect Annual Interest Rate - r
     cout << endl
-         << "( Annual Interest Rate divided by 12 --> for 10% annual interest, that would be 0.1/12 ~= 0.0083333 )" << endl
-         << " Monthly Interest Rate: ";
-    cin >> r;
+         << "( If your Annual Interest Rate is 10%, enter 10 )" << endl
+         << " Annual Interest Rate Percentage: ";
+    cin >> annualRatePercent;
     while (cin.fail() || r <= 0){
         cin.clear(); // clear input buffer to restore cin to a usable state
         cin.ignore(INT_MAX, '\n'); // ignore last input
@@ -145,10 +146,11 @@ void getUserInput(double& P, double& r, int& n){
              << "Your entry should be a number greater than 0." << endl
              << "Try again." << endl
              << endl
-             << "( Annual Interest Rate divided by 12 --> for 10% annual interest, that would be 0.1/12 ~= 0.0083333 )" << endl
-             << " Monthly Interest Rate: ";;
-        cin >> r;
-    };
+             << "( If your Annual Interest Rate is 10%, enter 10 )" << endl
+             << " Annual Interest Rate Percentage: ";
+        cin >> annualRatePercent;
+    }
+    r = (annualRatePercent/100)/12;
 
 
     ///Number of months to finish paying for Loan
@@ -178,7 +180,7 @@ double calculateAmortization(double P, double r, int n){
 }
 
 //displays info in table format
-void outputTable(double P, double r, int n, double M){
+void outputTable(double P, double r, int n, double M, double annualRatePercent){
     ofstream out_stream;
     bool isWritingToFile = askIfWritingToFile();
     string fileName;
@@ -195,9 +197,8 @@ void outputTable(double P, double r, int n, double M){
     }
 
 
-    string label = writeLabel(P, r, n, fileName);
+    string label = writeLabel(P, r, n, fileName, annualRatePercent);
     cout << label;
-    //FIXME --> ADD LABEL TO FILE
     if(isWritingToFile){
         out_stream << label;
     }
@@ -214,15 +215,13 @@ void outputTable(double P, double r, int n, double M){
 
         string row = writeRow(i, beginningBalance, interest, principal, endingBalance);
         cout << row;
-        //FIXME --> ADD ROW TO FILE
         if(isWritingToFile){
-        out_stream << row;
-    }
+            out_stream << row;
+        }
 
         if(i%12 == 0){
             string endYear = writeEndYear(i/12);
             cout << endYear;
-            //FIXME --> ADD ENDYEAR TO FILE
             if(isWritingToFile){
                 out_stream << endYear;
             }
@@ -234,11 +233,10 @@ void outputTable(double P, double r, int n, double M){
 
     string summary = writeSummary(M, n, totalAmountPaid, totalInterestPaid);
     cout << summary;
-    //FIXME --> ADD SUMMARY TO FILE
     if(isWritingToFile){
         out_stream << summary;
         cout << endl << endl
-             << "The table above has been written to " << fileName << ".txt";
+             << "The table above has been written to " << fileName << ".txt" << endl;
     }
 
     out_stream.close( );
@@ -260,9 +258,9 @@ void promptForFileName(string& fileName){
         cout << endl
              << "That is not a valid entry."
              << endl << endl
-             << "Your file name should only can contain lowercase letters, uppercase letters, numbers, and underscores." << endl
+             << "Your file name can only contain lowercase letters, uppercase letters, numbers, and underscores." << endl
              << "Please choose a name for your file.\nDo not include the file extension." << endl
-             << "file name: ";
+             << "File name: ";
         cin >> fileName;
     }
 }
@@ -302,7 +300,7 @@ bool askIfWritingToFile(){
 }
 
 //returns string that makes up initial row of table containing labels
-string writeLabel(double P, double r, int n, string fileName){
+string writeLabel(double P, double r, int n, string fileName, double annualRatePercent){
 
     stringstream nOfMonths;
     nOfMonths << n;
@@ -313,9 +311,13 @@ string writeLabel(double P, double r, int n, string fileName){
     stringstream rate;
     rate << r;
 
-    string label =   "\nFile Name: " + fileName
+    stringstream annualRate;
+    annualRate << annualRatePercent;
+
+    string label =   "\nName: " + fileName
                      + "\nRequested Loan: $" + loanAmount.str()
-                     + "\nMonthly rate: " + rate.str()
+                     + "\nAnnual Interest Rate Percentage: " + annualRate.str() + "%"
+                     + "\nMonthly Interest Rate: " + rate.str()
                      + "\nNumber of Payments: " + nOfMonths.str()
                      + "\n\n"
                      + columnLabel(" ") + " | "
