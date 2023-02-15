@@ -29,7 +29,7 @@ void calculateStartOfMonth(double& interest, double beginningBalance, double rat
 void trackPayments(double interest, double& totalInterestPaid, double principal, double& totalAmountPaid);
 string writeSummary(double M, int nOfMonths, double totalAmountPaid, double totalInterestPaid);
 string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance);
-string writeLabel(string label1, string label2, string label3, string label4, string label5);
+string writeLabel(string label1, string label2, string label3, string label4, string label5, double P, double r, int n, string fileName);
 
 string columnLabel(const string s);
 string rowDoubleValue(const double x);
@@ -54,6 +54,7 @@ int main()
     return 0;
 }
 
+//starts loan table creation flow
 void start(){
     double P; //the principal loan amount
     double r; //monthly interest rate
@@ -68,6 +69,7 @@ void start(){
     askForNewLoan();
 }
 
+//prompts for new loan
 void askForNewLoan(){
     int choice;
     cout << endl
@@ -177,42 +179,28 @@ double calculateAmortization(double P, double r, int n){
 
 //displays info in table format
 void outputTable(double P, double r, int n, double M){
-
-    /*
-
-    declare
-        output file var
-        isWriteToFile bool
-
-    ask user if they want to print this info into a file as well as see it onto a terminal.
-
-
-
-    if yes,
-        prompt for file name
-        isWriteToFile = true
-
-
-    include if statements that execute depending on isWriteToFile
-
-
-
-    at end, close var
-
-    */
     ofstream out_stream;
     bool isWritingToFile = askIfWritingToFile();
     string fileName;
 
     if(isWritingToFile){
         promptForFileName(fileName);
-        //open file
+        out_stream.open(fileName + ".txt");
+
+        if (out_stream.fail( ))
+        {
+            cout << "Output file opening failed.\n";
+            exit(1);
+        }
     }
 
 
-    string label = writeLabel(" ", "Beginning Balance", "Interest", "Principal", "Ending Balance");
+    string label = writeLabel(" ", "Beginning Balance", "Interest", "Principal", "Ending Balance", P, r, n, fileName);
     cout << label;
     //FIXME --> ADD LABEL TO FILE
+    if(isWritingToFile){
+        out_stream << label;
+    }
 
     double beginningBalance = P;
     double interest;
@@ -227,11 +215,17 @@ void outputTable(double P, double r, int n, double M){
         string row = writeRow(i, beginningBalance, interest, principal, endingBalance);
         cout << row;
         //FIXME --> ADD ROW TO FILE
+        if(isWritingToFile){
+        out_stream << row;
+    }
 
         if(i%12 == 0){
             string endYear = writeEndYear(i/12);
             cout << endYear;
             //FIXME --> ADD ENDYEAR TO FILE
+            if(isWritingToFile){
+                out_stream << endYear;
+            }
         }
 
         trackPayments(interest, totalInterestPaid, principal, totalAmountPaid);
@@ -241,32 +235,39 @@ void outputTable(double P, double r, int n, double M){
     string summary = writeSummary(M, n, totalAmountPaid, totalInterestPaid);
     cout << summary;
     //FIXME --> ADD SUMMARY TO FILE
+    if(isWritingToFile){
+        out_stream << summary;
+        cout << endl << endl
+             << "The table above has been written to " << fileName << ".txt";
+    }
 
-
-    //if writing to file, close file
+    out_stream.close( );
 }
 
+//collect file name input from user
 void promptForFileName(string& fileName){
     cout << endl
          << "Please choose a name for your file.\nDo not include the file extension." << endl
          << "file name: ";
     cin >> fileName;
 
-    while (cin.fail() ||
-           ( fileName.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_")!= std::string::npos) )
-   {
+    while (
+            cin.fail()
+            || ( fileName.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_")!= std::string::npos )
+    ){
         cin.clear(); // clear input buffer to restore cin to a usable state
         cin.ignore(INT_MAX, '\n'); // ignore last input
-        cout << "That is not a valid entry."
+        cout << endl
+             << "That is not a valid entry."
              << endl << endl
-             << "Your file name should only can contain lowercase letters, uppercase letters, numbers, and underscores."
-             << endl << endl
+             << "Your file name should only can contain lowercase letters, uppercase letters, numbers, and underscores." << endl
              << "Please choose a name for your file.\nDo not include the file extension." << endl
              << "file name: ";
         cin >> fileName;
     }
 }
 
+//checks if user wishes to write table to a file
 bool askIfWritingToFile(){
     int choice;
     cout << endl
@@ -300,9 +301,25 @@ bool askIfWritingToFile(){
     }
 }
 
+//UPDATEME -- Include Date and Time on top of table
 //returns string that makes up initial row of table containing labels
-string writeLabel(string label1, string label2, string label3, string label4, string label5){
-    string label = "\n\n" + columnLabel(label1) + " | "
+string writeLabel(string label1, string label2, string label3, string label4, string label5, double P, double r, int n, string fileName){
+
+    stringstream nOfMonths;
+    nOfMonths << n;
+
+    stringstream loanAmount;
+    loanAmount << P;
+
+    stringstream rate;
+    rate << r;
+
+    string label =   "\nFile Name: " + fileName
+                     + "\nRequested Loan: $" + loanAmount.str()
+                     + "\nMonthly rate: " + rate.str()
+                     + "\nNumber of Payments: " + nOfMonths.str()
+                     + "\n\n"
+                     + columnLabel(label1) + " | "
                      + columnLabel(label2) + " | "
                      + columnLabel(label3) + " | "
                      + columnLabel(label4) + " | "
