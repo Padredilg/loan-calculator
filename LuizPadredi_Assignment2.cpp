@@ -183,7 +183,7 @@ double calculateAmortization(double P, double r, int n){
 void outputTable(double P, double r, int n, double M, double annualRatePercent){
     ofstream out_stream;
     bool isWritingToFile = askIfWritingToFile();
-    string fileName;
+    string fileName = "Loan";
 
     if(isWritingToFile){
         promptForFileName(fileName);
@@ -332,7 +332,7 @@ string writeLabel(double P, double r, int n, string fileName, double annualRateP
 
 //returns string that makes up one row of the table
 string writeRow(int i, double beginningBalance, double interest, double principal, double endingBalance){
-    return rowIntValue(i) + " | "
+    return  rowIntValue(i) + " | "
             + rowDoubleValue(beginningBalance) + " | "
             + rowDoubleValue(interest) + " | "
             + rowDoubleValue(principal) + " | "
