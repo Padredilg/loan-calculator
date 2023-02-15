@@ -343,16 +343,24 @@ string writeRow(int i, double beginningBalance, double interest, double principa
 //returns string with payment summary information
 string writeSummary(double M, int n, double totalAmountPaid, double totalInterestPaid){
     stringstream amortization;
-    amortization << ceil(M * 100.0) / 100.0;
+    amortization << fixed;
+    amortization.precision(2);
+    amortization << M;
 
     stringstream nOfMonths;
+    nOfMonths << fixed;
+    nOfMonths.precision(2);
     nOfMonths << n;
 
     stringstream totalAmount;
-    totalAmount << ceil(totalAmountPaid * 100.0) / 100.0;
+    totalAmount << fixed;
+    totalAmount.precision(2);
+    totalAmount << totalAmountPaid;
 
     stringstream totalInterest;
-    totalInterest << ceil(totalInterestPaid * 100.0) / 100.0;
+    totalInterest << fixed;
+    totalInterest.precision(2);
+    totalInterest << totalInterestPaid;
 
 
     return "\n\nPayment Every Month: $" + amortization.str()
